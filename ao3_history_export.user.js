@@ -9,8 +9,10 @@
 // @require     https://github.com/riceconfetti/ao3_history_export/raw/main/ao3_history_export.user.js
 // ==/UserScript==
 
-$('.navigation.actions').append("<li><a id="ao3_download_history">Download</span></li>");
-$('#a03_download_history').click(downloadHistory);
+$(function() {
+  $('.navigation.actions').append("<li><a id="ao3_download_history">Download</span></li>");
+  $('#a03_download_history').click(downloadHistory);
+});
 
 function downloadHistory() {
 
