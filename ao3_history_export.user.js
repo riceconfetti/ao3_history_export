@@ -8,6 +8,9 @@
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js
 // @updateURL   https://github.com/riceconfetti/ao3_history_export/raw/main/ao3_history_export.user.js
 // ==/UserScript==
+$('.navigation.actions').append('<li><a id="ao3_download_history">Download</span></li>');
+$('#ao3_download_history').click(downloadCSV);
+
 
 const e = t => new Promise(e => {
   const n = new XMLHttpRequest;
@@ -85,6 +88,9 @@ async function g(r) {
 
 g(location.href);
 
-var encodedUri = encodeURI(history);
-$('.navigation.actions').append('<li><a id="ao3_download_history">Download</span></li>');
-$('#ao3_download_history').attr("download", "history.csv").attr("href", encodedUri);
+
+function downloadCSV() {
+  var encodedUri = encodeURI(history);
+  $('#ao3_download_history').attr("download", "history.csv").attr("href", encodedUri);
+  $('#ao3_download_history').click();
+}
