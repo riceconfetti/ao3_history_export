@@ -1,16 +1,13 @@
 // ==UserScript==
 // @name        AO3 History Export
 // @namespace   https://github.com/riceconfetti
-// @version     1.3
+// @version     1.4
 // @description Export reading history to csv.
 // @match       https://archiveofourown.org/users/*/readings*
 // @grant       none
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js
 // @updateURL   https://github.com/riceconfetti/ao3_history_export/raw/main/ao3_history_export.user.js
 // ==/UserScript==
-$('.navigation.actions').append('<li><a id="ao3_download_history">Download</span></li>');
-$('#ao3_download_history').click(downloadCSV);
-
 
 const e = t => new Promise(e => {
   const n = new XMLHttpRequest;
@@ -19,7 +16,7 @@ const e = t => new Promise(e => {
   n.send()
 });
 
-const n = t => Array.from(t.querySelectorAll('#main ol li.reading.work')).map(l);
+const n = t => Array.from(t.querySelectorAll('#main ol li.reading.work:not(.deleted)')).map(l);
 const r = (t, e) => t === null ? null : t[e];
 const o = t => t === null ? null : Array.from(t).map(t => t.innerHTML);
 const l = t => ({
@@ -59,9 +56,6 @@ async function g(r) {
   let a = 1;
   const o = new DOMParser;
   while (r !== null) {
-    if (a > 10) {
-      break;
-    }
     a++;
     const t = o.parseFromString(await e(r), 'text/html');
     let q = n(t);
@@ -84,13 +78,14 @@ async function g(r) {
     console.log(r);
     await s(a < 1e3 ? 3e3 : 1e4);
   }
+  var encodedUri = encodeURI(history);
+  var link = document.createElement("a");
+  link.innerHTML="Download Data";
+	link.setAttribute("href", encodedUri);
+	link.setAttribute("download", "my_data.csv");
+  var listItem = document.createElement("li");
+  listItem.appendChild(link)
+	$(".navigation.actions").append(listItem);
 }
 
 g(location.href);
-
-
-function downloadCSV() {
-  var encodedUri = encodeURI(history);
-  $('#ao3_download_history').attr("download", "history.csv").attr("href", encodedUri);
-  $('#ao3_download_history').click();
-}
