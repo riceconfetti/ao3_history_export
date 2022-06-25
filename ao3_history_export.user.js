@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        AO3 History Export
 // @namespace   https://github.com/riceconfetti
-// @version     1.2
+// @version     1.3
 // @description Export reading history to csv.
 // @match       https://archiveofourown.org/users/*/readings*
 // @grant       none
