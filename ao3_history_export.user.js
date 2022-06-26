@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name        AO3 History Export
 // @namespace   https://github.com/riceconfetti
-// @version     1.4
+// @version     1.5
 // @description Export reading history to csv.
 // @match       https://archiveofourown.org/users/*/readings*
 // @grant       none
@@ -19,33 +19,38 @@ const e = t => new Promise(e => {
 const n = t => Array.from(t.querySelectorAll('#main ol li.reading.work:not(.deleted)')).map(l);
 const r = (t, e) => t === null ? null : t[e];
 const o = t => t === null ? null : Array.from(t).map(t => t.innerHTML);
+
 const l = t => ({
-  title: function() {return t.querySelector('div .heading a').innerHTML;},
+  title: t.querySelector('div .heading a').innerText.trim(),
+  summary: t.querySelector("blockquote.summary"),
   author: function() {
     if (t.querySelector('div .heading a[rel="author"]') === null) {
-        let html = t.querySelector('div .heading').innerHTML;
-      	//return html;
-    		return html.slice(html.indexOf("-->")+ 6,html.length).trim();
+        let text = t.querySelector('div .heading').innerText.trim();
+      	text = text.slice(text.indexOf("by")+ 6,text.length);
+      	//console.log(text.trim());
+    		return text.trim();
     } else {
-      return t.querySelector('div .heading a[rel="author"]').innerHTML;
+      return t.querySelector('div .heading a[rel="author"]').innerText.trim();
     }
   },
   fandoms: function() {
-    var fandoms = t.querySelectorAll('div .fandoms a');
+    var fandoms = t.querySelectorAll('div .fandoms a.tag');
     var fText = new Array();
     for (var i=0; i< fandoms.length; ++i ) {
-      fText[i] = fandoms[i].outerText;
-    } return fText;
+      fText[i] = fandoms[i].innerText.trim();
+      //console.log(fText[i]);
+    }//console.log(fText);
+    return fText;
   },
-  summary: function() {return t.querySelector('blockquote p').outerText;},
   tags: function() {
     var tags = t.querySelectorAll('.tags li a');
     var tText = new Array();
     for (var i=0; i< tags.length; ++i ) {
-      tText[i] = tags[i].outerText;
+      tText[i] = tags[i].innerText.trim();
     } return tText;
   }
 });
+
 const c = t => t.querySelector('a[rel="next"]');
 const s = t => new Promise(e => setTimeout(e, t));
 const d=()=>(new Date).getDay()===0;
@@ -57,17 +62,29 @@ async function g(r) {
   const o = new DOMParser;
   while (r !== null) {
     a++;
+    if (a >30 )
+      break;
     const t = o.parseFromString(await e(r), 'text/html');
     let q = n(t);
+    console.log(q);
+
     for (let i=0; i< q.length; ++i) {
-      console.log(q[i].title() +"  "+ q[i].author());
-    	let row = q[i].title() + "," + q[i].author() + ",";
-      for (let j=0; j< q[i].fandoms().length; ++j) {
-        row += q[i].fandoms()[j] +";"
+      //console.log(q[i].title +"  "+ q[i].author());
+    	let row = q[i].title + "\t" + q[i].author() + "\t";
+      var fandoms = q[i].fandoms();
+      console.log(fandoms);
+
+      for (let j=0; j< fandoms.length; ++j) {
+        row += "[" + fandoms[j] +"] ";
       }
-      row += "," + q[i].summary() + ",";
-      for (let j=0; j< q[i].tags().length; ++j) {
-        row += q[i].tags()[j] +";"
+
+      var summary = (q[i].summary === null) ? "" : q[i].summary.innerText.trim().replace(/(\r\n|\n|\r)/gm, "");
+
+      row += "\t" + summary + "\t";
+      console.log(summary);
+      var tags = q[i].tags();
+      for (let j=0; j< tags.length; ++j) {
+        row += "[" + tags[j] +"] ";
       }
       row += "\n";
       history += row;
@@ -78,11 +95,13 @@ async function g(r) {
     console.log(r);
     await s(a < 1e3 ? 3e3 : 1e4);
   }
-  var encodedUri = encodeURI(history);
+  alert("Done!");
+  console.log(history);
+  var encodedUri = encodeURIComponent(history);
   var link = document.createElement("a");
   link.innerHTML="Download Data";
 	link.setAttribute("href", encodedUri);
-	link.setAttribute("download", "my_data.csv");
+	link.setAttribute("download", "history.txt");
   var listItem = document.createElement("li");
   listItem.appendChild(link)
 	$(".navigation.actions").append(listItem);
