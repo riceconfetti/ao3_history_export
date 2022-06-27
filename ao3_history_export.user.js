@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name        AO3 History Export
 // @namespace   https://github.com/riceconfetti
-// @version     1.5
-// @description Export reading history to csv.
+// @version     1.6
+// @description Export reading history to tsv.
 // @match       https://archiveofourown.org/users/*/readings*
 // @grant       none
 // @require     https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js
@@ -54,11 +54,11 @@ const l = t => ({
 const c = t => t.querySelector('a[rel="next"]');
 const s = t => new Promise(e => setTimeout(e, t));
 const d=()=>(new Date).getDay()===0;
-let history = "data:text/csv;charset=utf-8,";
 
 async function g(r) {
-  if (d())return alert("Don't run this script on Sundays");
+  //if (d())return alert("Don't run this script on Sundays");
   let a = 1;
+  let history = "data:text/txt;charset=utf-8\t";
   const o = new DOMParser;
   while (r !== null) {
     a++;
@@ -71,6 +71,7 @@ async function g(r) {
     for (let i=0; i< q.length; ++i) {
       //console.log(q[i].title +"  "+ q[i].author());
     	let row = q[i].title + "\t" + q[i].author() + "\t";
+      console.log(row)
       var fandoms = q[i].fandoms();
       console.log(fandoms);
 
@@ -95,9 +96,11 @@ async function g(r) {
     console.log(r);
     await s(a < 1e3 ? 3e3 : 1e4);
   }
-  alert("Done!");
+
   console.log(history);
-  var encodedUri = encodeURIComponent(history);
+
+  var encodedUri = encodeURI(history);
+  window.open(encodedUri);
   var link = document.createElement("a");
   link.innerHTML="Download Data";
 	link.setAttribute("href", encodedUri);
@@ -105,6 +108,8 @@ async function g(r) {
   var listItem = document.createElement("li");
   listItem.appendChild(link)
 	$(".navigation.actions").append(listItem);
+
+  alert("Done!");
 }
 
 g(location.href);
